@@ -1,4 +1,10 @@
-window._ = require('lodash');
+import _ from 'lodash';
+window._ = _;
+
+import axios from 'axios';
+window.axios = axios;
+
+// window._ = require('lodash');
 
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
@@ -6,7 +12,7 @@ window._ = require('lodash');
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
 
-window.axios = require('axios');
+// window.axios = require('axios');
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
