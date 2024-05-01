@@ -11,6 +11,10 @@ class InertiaTestController extends Controller
     public function index(){
         return Inertia::render('Inertia/Index');
     }
+
+    public function create(){
+        return Inertia::render('Inertia/Create');
+    }
     
     public function show($id){
         // dd($id);
@@ -22,6 +26,12 @@ class InertiaTestController extends Controller
     }
 
     public function store(Request $request){
+
+        $request->validate([
+            'title' => ['required', 'max:20'],
+            'content' => ['required']
+        ]);
+
         $inertiaTest = new InertiaTest;
         $inertiaTest->title = $request->title;
         $inertiaTest->content = $request->content;
