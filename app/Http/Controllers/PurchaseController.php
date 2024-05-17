@@ -115,7 +115,37 @@ class PurchaseController extends Controller
      */
     public function edit(Purchase $purchase)
     {
-        //
+        $purchase = Purchase::find($purchase->id);
+
+        $allItems = Item::select('id', 'name', 'price')->get();
+
+        $items = [];
+
+        foreach($allItems as $allItem){
+            $quantity = 0;
+            foreach($purchase->items as $item){
+                if($allItem->id === $item->id){
+                    $quantity = $item->pivot->quantity;
+                }
+            }
+            array_push($items, [
+                'id' => $allItem->id,
+                'name' => $allItem->name,
+                'price' => $allItem->price,
+                'quantity' => $quantity
+            ]);
+        }
+
+        $order = Order::groupBy('id')
+        ->where('id', $purchase->id)
+        ->selectRaw('id, customer_id,
+        customer_name, status, created_at')
+        ->get();
+
+        return Inertia::render('Purchase/Edit', [
+            'items' => $items,
+            'order' => $order
+        ]);
     }
 
     /**
@@ -127,7 +157,29 @@ class PurchaseController extends Controller
      */
     public function update(UpdatePurchaseRequest $request, Purchase $purchase)
     {
-        //
+        DB::beginTransaction();
+
+        try{
+            $purchase->status = $request->status;
+            $purchase-> save();
+
+            $items = [];
+            foreach($request->items as $item){
+                $items = $items + [
+                    $item['id'] => [
+                        'quantity' => $item['quantity']
+                    ]
+                    ];
+            }
+
+            $purchase->items()->sync($items);
+
+            DB::commit();
+
+            return to_route('dashboard');
+        }catch(\Exception $e){
+            DB::rollback();
+        }
     }
 
     /**
